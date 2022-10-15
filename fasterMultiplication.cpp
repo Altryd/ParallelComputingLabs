@@ -1,5 +1,6 @@
 #include <iostream>
 #include <chrono>
+#include<omp.h>
 
 #define RAND_VALUE 311
 int main()
@@ -39,12 +40,14 @@ int main()
     fread(matrix_2, sizeof(int), N2 * N2, Read);
     fclose(Read);
 
-    size_t iteration_all = 15;
+    size_t iteration_all = 8;
     auto begin = std::chrono::steady_clock::now();
     std::chrono::duration<double, std::milli> sum_of_milli = begin - begin;
+
     for (size_t iteration_count = 0; iteration_count < iteration_all; ++iteration_count)
     {
         //умножение с транспонированием
+
         begin = std::chrono::steady_clock::now();
         int* matrix_2_transponse = new int[N * N];
         for (int i = 0; i < N; ++i)
@@ -70,17 +73,19 @@ int main()
 
         int* matrix_4 = new int[N * N];
         //умножение на трансп.
-        for (int i = 0; i < N; ++i)
-        {
-            for (int j = 0; j < N; ++j)
+            #pragma omp parallel for num_threads(16)
+            for (int i = 0; i < N; ++i)
             {
-                matrix_4[i * N + j] = 0;
-                for (int k = 0; k < N; ++k)
+                for (int j = 0; j < N; ++j)
                 {
-                    matrix_4[i * N + j] += matrix_1[i * N + k] * matrix_2_transponse[j * N + k];
+                    matrix_4[i * N + j] = 0;
+                    for (int k = 0; k < N; ++k)
+                    {
+                        matrix_4[i * N + j] += matrix_1[i * N + k] * matrix_2_transponse[j * N + k];
+                    }
                 }
             }
-        }
+
 #ifdef DEBUG
         std::cout << "Результат умножения матрицы 1 на транспонированную" << std::endl;
         for (int i = 0; i < N; ++i)
@@ -119,5 +124,4 @@ int main()
     delete[] matrix_1;
     delete[] matrix_2;
     return 0;
-
 }
