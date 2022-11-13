@@ -1,10 +1,22 @@
 #include <iostream>
 #include <chrono>
+#include <sstream>
 
 #define RAND_VALUE 350
-int main()
+int main(int argc, char* argv[])
 {
-    int N = 1001;
+
+    int N = 0;
+    if (argc < 2) N = 320;
+    else {
+        std::istringstream ss(argv[1]);
+        if (!(ss >> N))
+        {
+            std::cerr << "Invalid Number: " << argv[1] << std::endl;
+            return 0;
+        }
+        std::cout << "N is: " << N << std::endl;
+    }
     setlocale(LC_ALL, "Ru");
     int* matrix_1 = new int[N * N];
 #ifdef DEBUG
